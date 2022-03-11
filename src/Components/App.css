@@ -27,3 +27,15 @@
   top: 50%;
   left: 50%;
 }
+
+.large-margin-top {
+  margin-top: 80px;
+}
+
+.mobile-margin-bottom {
+  margin-bottom: 30px;
+}
+
+.desktop-margin-bottom {
+  margin-bottom: 100px;
+}

@@ -1,0 +1,7 @@
+.TableFooter {
+    margin-top: 10px;
+}
+
+.TableFooter > div {
+    align-items: baseline;
+}

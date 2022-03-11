@@ -6,6 +6,7 @@ import {onAuthStateChanged, signOut} from "firebase/auth";
 import {useEffect, useState} from "react";
 import Spinner from 'react-bootstrap/Spinner';
 import Dashboard from "./Dashboard";
+import {useNavigate} from "react-router-dom";
 
 
 function App() {
@@ -13,10 +14,16 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         onAuthStateChanged(auth, (currentUser) => {
-            console.log(!!currentUser);
             setIsLoggedIn(!!currentUser);
+            if (!!currentUser) {
+                navigate('/countries');
+            } else {
+                navigate('/login');
+            }
             if (isLoading) {
                 setIsLoading(false);
             }
