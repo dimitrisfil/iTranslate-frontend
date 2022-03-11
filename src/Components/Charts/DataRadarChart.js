@@ -15,14 +15,16 @@ const DataRadarChart = (props) => {
         title: {
             text: props.title
         },
+        colors: ["#007ED6", "#7CDDDD"],
         stroke: {
             width: 2
         },
+
         fill: {
             opacity: 0.1
         },
         markers: {
-            size: 0
+            size: 4
         },
         xaxis: {
             categories: props.categories

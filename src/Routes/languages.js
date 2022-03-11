@@ -38,10 +38,10 @@ const Language = () => {
 
     const series = [{
         name: 'Source Language',
-        data: [80, 50, 30, 40],
+        data: [80, 50, 30, 40]
     }, {
         name: 'Target Language',
-        data: [20, 30, 40, 80],
+        data: [20, 30, 40, 80]
     }];
 
     return <Container className="large-margin-top" maxWidth="xl">
