@@ -5,18 +5,16 @@ import {firestore} from "../firebase-config";
 import PieChart from "../Components/Charts/PieChart";
 import DataTable from "../Components/DataTable";
 import Spinner from "react-bootstrap/Spinner";
-import {useMediaQuery} from "@mui/material";
 import "../Components/App.css"
 import DatePicker from "../Components/DatePicker";
 import {useMemo, useState} from "react";
 import LineChart from "../Components/Charts/LineChart";
 import moment from "moment";
-import dateRange from "react-date-range/dist/components/DateRange";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 
 function getAggregations(snapshot) {
-    /*const countryData = [];
+    const countryData = [];
     snapshot.docs.forEach((docSnapshot) => {
         const data = docSnapshot.data();
         const countryIndex = countryData.findIndex(country => {
@@ -55,32 +53,17 @@ function getAggregations(snapshot) {
         });
         return {
             topic: country.country,
-            count: country.count,
             tableData: [
+                country.count,
                 country.sourceLanguages[maxKeyIndex].language // Top source Language
             ]
         };
     });
-    return aggregations.sort((countryA, countryB) => (countryA.count < countryB.count) ? 1 : ((countryB.count < countryA.count) ? -1 : 0));*/
-
-    return [{
-        topic: 'Greece',
-        count: 60,
-        tableData: [
-            "English" // Top source Language
-        ]
-    },
-        {
-            topic: 'Germany',
-            count: 65,
-            tableData: [
-                "English" // Top source Language
-            ]
-        }];
+    return aggregations.sort((countryA, countryB) => (countryA.tableData[0] < countryB.tableData[0]) ? 1 : ((countryB.tableData[0] < countryA.tableData[0]) ? -1 : 0));
 }
 
 function getLineAggregations(snapshot, dateRange) {
-    /*const startDate = moment(dateRange[0].getTime());
+    const startDate = moment(dateRange[0].getTime());
     const endDate = moment(dateRange[1].getTime());
     const slots = [];
     const lineData = [];
@@ -92,8 +75,8 @@ function getLineAggregations(snapshot, dateRange) {
 
     snapshot.docs.forEach((docSnapshot) => {
         const data = docSnapshot.data();
-        const countryIndex = lineData.findIndex(entity => {
-            return entity.topic === lineData.country
+        let countryIndex = lineData.findIndex(entity => {
+            return entity.topic === data.country
         });
         const month = moment(data.timestamp).format("MMMM");
         if (countryIndex === -1) {
@@ -101,7 +84,7 @@ function getLineAggregations(snapshot, dateRange) {
                 topic: data.country,
                 values: new Array(slots.length).fill(0)
             });
-
+            countryIndex = lineData.length - 1;
         }
         lineData[countryIndex].values[slots.indexOf(month)]++;
     });
@@ -109,47 +92,29 @@ function getLineAggregations(snapshot, dateRange) {
     return {
         slots: slots,
         data: lineData
-    };*/
-
-    return {
-        slots: ["January", "February", "March"],
-        data: [
-            {
-                topic: "Greece",
-                values: [10, 20, 30]
-            },
-            {
-                topic: "Germany",
-                values: [8, 25, 32]
-            }
-        ]
     };
 }
 
-const Country = () => {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setMonth(startDate.getMonth() - 1); // One month
-    const [dateRange, setDateRange] = useState([startDate, endDate]);
+const Country = (props) => {
+    const [dateRange, setDateRange] = useState([props.initialDates.startDate, props.initialDates.endDate]);
 
-    /*const ref = query(
+    const ref = query(
         collection(firestore, "translations"),
-        limit(5),
-        //where("timestamp", ">=", dateRange[0].getTime()),
-        //where("timestamp", "<=", dateRange[1].getTime())
+        limit(10),
+        where("timestamp", ">=", dateRange[0].getTime()),
+        where("timestamp", "<=", dateRange[1].getTime())
     );
 
-    const translations = useFirestoreQuery(["translations"], ref);
+    const translations = useFirestoreQuery(["translations", dateRange[0].getTime(), dateRange[1].getTime()], ref, {
+        subscribe: true,
+    });
 
     if (translations.isLoading) {
         return <Spinner className="Loading" animation="grow"/>;
-    }*/
+    }
 
-    const countryAggregations = getAggregations("dummy");
-    const countryLineAggregations = getLineAggregations("dummy", dateRange);
-
-    /*const countryAggregations = useMemo(() => getAggregations(translations.data), [translations.data]);
-    const countryLineAggregations = useMemo(() => getLineAggregations(translations.data), [translations.data]);*/
+    const countryAggregations = getAggregations(translations.data, dateRange);
+    const countryLineAggregations = getLineAggregations(translations.data, dateRange);
 
     const headers = ["Country", "Translations", "Top Source Language"];
 
@@ -165,12 +130,20 @@ const Country = () => {
                 <PieChart aggregations={countryAggregations} title="Translations Per Country"/>
             </Grid>
             <Grid item xs={4} sm={8} md={6}>
-                <DataTable aggregations={countryAggregations} headers={headers}/>
+                <DataTable aggregations={countryAggregations} headers={headers} hasPagination={true}/>
             </Grid>
         </Grid>
     </Box>;
 
     const noContent = <Box sx={{flexGrow: 1}}>
+        <Grid container spacing={{xs: 3, md: 4}} columns={{xs: 4, sm: 8, md: 12}}>
+            <Grid item xs={4} sm={8} md={12}>
+                <DatePicker dateRange={dateRange} setDateRange={setDateRange}/>
+            </Grid>
+            <Grid item xs={4} sm={8} md={12}>
+                <h3 className="text-center mt-lg-5">No data found for the selected time frame.</h3>
+            </Grid>
+        </Grid>
     </Box>;
 
     return <Container className="large-margin-top" maxWidth="xl">

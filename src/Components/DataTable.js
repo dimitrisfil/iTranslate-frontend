@@ -15,7 +15,7 @@ const DataTable = (props) => {
         setPage(0);
     };
 
-    return <Box className="mt-lg-3 flex-grow-1">
+    return <Box className="mt-lg-3 mb-lg-5  flex-grow-1">
         <TableContainer component={Paper}>
             <Table aria-label="simple table">
                 <TableHead sx={{backgroundColor: "#126efd"}}>
@@ -34,24 +34,20 @@ const DataTable = (props) => {
                 <TableBody>
                     {props.aggregations
                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                        .map((entity) => (
+                        .map((entity, index) => (
                             <TableRow
-                                key={entity.topic}
+                                key={index}
                                 sx={{'&:last-child td, &:last-child th': {border: 0}}}
                             >
-                                <TableCell component="th" scope="row">
-                                    {entity.topic}
-                                </TableCell>
-                                <TableCell align="right">{entity.count}</TableCell>
-                                {entity.tableData.map(data => {
-                                    return <TableCell key={entity.tableData.indexOf(data)} align="right">{data}</TableCell>
+                                {entity.tableData.map((data, colIndex) => {
+                                    return <TableCell key={colIndex} align={colIndex !== 0 ? "right" : ""}>{data}</TableCell>
                                 })}
                             </TableRow>
                         ))}
                 </TableBody>
             </Table>
         </TableContainer>
-        <TablePagination
+        {props.hasPagination && <TablePagination
             className="TableFooter"
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
@@ -60,7 +56,7 @@ const DataTable = (props) => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        />}
     </Box>
 }
 

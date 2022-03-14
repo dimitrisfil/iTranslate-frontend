@@ -8,41 +8,82 @@ import Grid from "@mui/material/Grid";
 import LineChart from "../Components/Charts/LineChart";
 import Box from "@mui/material/Box";
 import DataRadarChart from "../Components/Charts/DataRadarChart";
+import {collection, limit, query, where} from "firebase/firestore";
+import {firestore} from "../firebase-config";
+import {useFirestoreQuery} from "@react-query-firebase/firestore";
+import Spinner from "react-bootstrap/Spinner";
 
-function getAggregations(snapshot) {
-    const dummyData = [];
-    for (let i = 0; i < 10; i++) {
-        dummyData.push({
-            topic: "English" + i,
-            count: Math.floor(Math.random() * 100),
-            tableData: [
-                35// Number of users
-            ],
+function getTableAggregations(snapshot) {
+    const languageData = [];
+    snapshot.docs.forEach((docSnapshot) => {
+        const data = docSnapshot.data();
+        const languageIndex = languageData.findIndex(language => {
+            return language.topic === data.sourceLanguage || language.topic === data.targetLanguage;
         });
-    }
-    return dummyData;
+        if (languageIndex === -1) {
+            languageData.push({
+                tableData: [
+                    data.sourceLanguage, // Language
+                    1, // Source Translations
+                    0 // Target Translations
+                ],
+            });
+            if (data.sourceLanguage.localeCompare(data.targetLanguage) !== 0) {
+                languageData.push({
+                    tableData: [
+                        data.targetLanguage, // Language
+                        0, // Source Translations
+                        1 // Target Translations
+                    ],
+                });
+            }
+        } else {
+            if (languageData[languageIndex].tableData[0].localeCompare(data.sourceLanguage) === 0) {
+                languageData[languageIndex].tableData[1]++;
+            }
+            if (languageData[languageIndex].tableData[0].localeCompare(data.targetLanguage) === 0) {
+                languageData[languageIndex].tableData[2]++;
+            }
+        }
+    });
+    return languageData.sort((languageA, languageB) => (languageA.tableData[0] < languageB.tableData[0]) ? 1 : ((languageB.tableData[0] < languageA.tableData[0]) ? -1 : 0));
 }
 
-const Language = () => {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setMonth(startDate.getMonth() - 1); // One month
-    const [dateRange, setDateRange] = useState([startDate, endDate]);
+function getRadarAggregations(snapshot) {
+    return {
+        categories: ['Greece', 'Germany', 'Italy', 'Spain'],
+        series: [{
+            name: 'Source Language',
+            data: [80, 50, 30, 40]
+        }, {
+            name: 'Target Language',
+            data: [20, 30, 40, 80]
+        }]
+    }
+}
 
-    const sourceLanguageAggregations = getAggregations("sourceLanguage");
-    const targetLanguageAggregations = getAggregations("targetLanguage");
+const Language = (props) => {
+    const [dateRange, setDateRange] = useState([props.initialDates.startDate, props.initialDates.endDate]);
 
-    const headers = ["Language", "Translations (Source/Target)", "Users (Source/Target)"];
+    const ref = query(
+        collection(firestore, "translations"),
+        limit(10),
+        where("timestamp", ">=", dateRange[0].getTime()),
+        where("timestamp", "<=", dateRange[1].getTime())
+    );
 
-    const categories = ['Greece', 'Germany', 'Italy', 'Spain'];
+    const translations = useFirestoreQuery(["translations", dateRange[0].getTime(), dateRange[1].getTime()], ref, {
+        subscribe: true,
+    });
 
-    const series = [{
-        name: 'Source Language',
-        data: [80, 50, 30, 40]
-    }, {
-        name: 'Target Language',
-        data: [20, 30, 40, 80]
-    }];
+    if (translations.isLoading) {
+        return <Spinner className="Loading" animation="grow"/>;
+    }
+
+    const tableAggregations = getTableAggregations(translations.data);
+    const radarAggregations = getRadarAggregations(translations.data);
+
+    const headers = ["Language", "Source Translations", "Target Translations"];
 
     return <Container className="large-margin-top" maxWidth="xl">
         <Box sx={{flexGrow: 1}}>
@@ -51,10 +92,10 @@ const Language = () => {
                     <DatePicker dateRange={dateRange} setDateRange={setDateRange}/>
                 </Grid>
                 <Grid item xs={4} sm={8} md={6}>
-                    <DataRadarChart title="Translations by Source/Target Language" categories={categories} series={series}/>
+                    <DataRadarChart title="Top 10 Translations by Source/Target Language" categories={radarAggregations.categories} series={radarAggregations.series}/>
                 </Grid>
                 <Grid item xs={4} sm={8} md={6}>
-                    <DataTable aggregations={sourceLanguageAggregations} headers={headers}/>
+                    <DataTable aggregations={tableAggregations} headers={headers} hasPagination={true}/>
                 </Grid>
             </Grid>
         </Box>
