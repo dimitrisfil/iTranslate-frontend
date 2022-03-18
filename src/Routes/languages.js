@@ -1,24 +1,27 @@
-import {useMediaQuery} from "@mui/material";
 import {useState} from "react";
 import Container from "@mui/material/Container";
 import DatePicker from "../Components/DatePicker";
-import PieChart from "../Components/Charts/PieChart";
 import DataTable from "../Components/DataTable";
 import Grid from "@mui/material/Grid";
-import LineChart from "../Components/Charts/LineChart";
 import Box from "@mui/material/Box";
 import DataRadarChart from "../Components/Charts/DataRadarChart";
-import {collection, limit, query, where} from "firebase/firestore";
+import {collection, query, where} from "firebase/firestore";
 import {firestore} from "../firebase-config";
 import {useFirestoreQuery} from "@react-query-firebase/firestore";
 import Spinner from "react-bootstrap/Spinner";
+
+function median(arr) {
+    const mid = Math.floor(arr.length / 2),
+        nums = [...arr].sort((a, b) => a - b);
+    return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+}
 
 function getTableAggregations(snapshot) {
     const languageData = [];
     snapshot.docs.forEach((docSnapshot) => {
         const data = docSnapshot.data();
         const languageIndex = languageData.findIndex(language => {
-            return language.topic === data.sourceLanguage || language.topic === data.targetLanguage;
+            return language.tableData[0] === data.sourceLanguage || language.tableData[0] === data.targetLanguage;
         });
         if (languageIndex === -1) {
             languageData.push({
@@ -46,18 +49,22 @@ function getTableAggregations(snapshot) {
             }
         }
     });
-    return languageData.sort((languageA, languageB) => (languageA.tableData[0] < languageB.tableData[0]) ? 1 : ((languageB.tableData[0] < languageA.tableData[0]) ? -1 : 0));
+
+    return languageData.sort((languageA, languageB) => (
+        median([languageA.tableData[1], languageA.tableData[2]]) < median([languageB.tableData[1], languageB.tableData[2]])) ? 1 :
+        ((median([languageB.tableData[1], languageB.tableData[2]]) < median([languageA.tableData[1], languageA.tableData[2]])) ? -1 : 0));
 }
 
-function getRadarAggregations(snapshot) {
+function getRadarAggregations(aggregations) {
+    aggregations = aggregations.slice(0, 10);
     return {
-        categories: ['Greece', 'Germany', 'Italy', 'Spain'],
+        categories: aggregations.map(language => language.tableData[0]),
         series: [{
             name: 'Source Language',
-            data: [80, 50, 30, 40]
+            data: aggregations.map(language => language.tableData[1])
         }, {
             name: 'Target Language',
-            data: [20, 30, 40, 80]
+            data: aggregations.map(language => language.tableData[2])
         }]
     }
 }
@@ -67,7 +74,6 @@ const Language = (props) => {
 
     const ref = query(
         collection(firestore, "translations"),
-        limit(10),
         where("timestamp", ">=", dateRange[0].getTime()),
         where("timestamp", "<=", dateRange[1].getTime())
     );
@@ -81,7 +87,7 @@ const Language = (props) => {
     }
 
     const tableAggregations = getTableAggregations(translations.data);
-    const radarAggregations = getRadarAggregations(translations.data);
+    const radarAggregations = getRadarAggregations(tableAggregations);
 
     const headers = ["Language", "Source Translations", "Target Translations"];
 

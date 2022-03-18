@@ -28,7 +28,6 @@ const DataTable = (props) => {
                             >{header}
                             </TableCell>
                         })}
-
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -40,7 +39,7 @@ const DataTable = (props) => {
                                 sx={{'&:last-child td, &:last-child th': {border: 0}}}
                             >
                                 {entity.tableData.map((data, colIndex) => {
-                                    return <TableCell key={colIndex} align={colIndex !== 0 ? "right" : ""}>{data}</TableCell>
+                                    return <TableCell key={colIndex} align={colIndex !== 0 ? "right" : "left"}>{data}</TableCell>
                                 })}
                             </TableRow>
                         ))}

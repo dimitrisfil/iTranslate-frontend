@@ -1,5 +1,5 @@
 import Container from "@mui/material/Container";
-import {collection, query, limit, where} from "firebase/firestore";
+import {collection, query, where} from "firebase/firestore";
 import {useFirestoreQuery} from "@react-query-firebase/firestore";
 import {firestore} from "../firebase-config";
 import PieChart from "../Components/Charts/PieChart";
@@ -7,7 +7,7 @@ import DataTable from "../Components/DataTable";
 import Spinner from "react-bootstrap/Spinner";
 import "../Components/App.css"
 import DatePicker from "../Components/DatePicker";
-import {useMemo, useState} from "react";
+import {useState} from "react";
 import LineChart from "../Components/Charts/LineChart";
 import moment from "moment";
 import Grid from "@mui/material/Grid";
@@ -52,14 +52,14 @@ function getAggregations(snapshot) {
             return sourceLanguage.count === maxValue
         });
         return {
-            topic: country.country,
             tableData: [
+                country.country,
                 country.count,
                 country.sourceLanguages[maxKeyIndex].language // Top source Language
             ]
         };
     });
-    return aggregations.sort((countryA, countryB) => (countryA.tableData[0] < countryB.tableData[0]) ? 1 : ((countryB.tableData[0] < countryA.tableData[0]) ? -1 : 0));
+    return aggregations.sort((countryA, countryB) => (countryA.tableData[1] < countryB.tableData[1]) ? 1 : ((countryB.tableData[1] < countryA.tableData[1]) ? -1 : 0));
 }
 
 function getLineAggregations(snapshot, dateRange) {
@@ -100,7 +100,6 @@ const Country = (props) => {
 
     const ref = query(
         collection(firestore, "translations"),
-        limit(10),
         where("timestamp", ">=", dateRange[0].getTime()),
         where("timestamp", "<=", dateRange[1].getTime())
     );

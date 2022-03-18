@@ -1,5 +1,4 @@
 import ReactApexChart from "react-apexcharts";
-import {useMediaQuery} from "@mui/material";
 
 const PieChart = (props) => {
     const options = {
@@ -11,11 +10,11 @@ const PieChart = (props) => {
     };
 
     options.labels = props.aggregations.map(country => {
-        return country.topic;
+        return country.tableData[0];
     });
 
     const series = props.aggregations.map(country => {
-        return country.count;
+        return country.tableData[1];
     });
 
     return <ReactApexChart options={options} series={series} type="pie"/>

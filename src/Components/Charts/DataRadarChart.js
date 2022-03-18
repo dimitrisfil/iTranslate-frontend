@@ -28,6 +28,11 @@ const DataRadarChart = (props) => {
         },
         xaxis: {
             categories: props.categories
+        },
+        yaxis: {
+            labels: {
+                formatter: (value) => { return parseInt(value) },
+            }
         }
     };
 

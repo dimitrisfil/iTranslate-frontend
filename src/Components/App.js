@@ -2,12 +2,11 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import SignIn from './SignIn';
 import {auth} from "../firebase-config";
-import {onAuthStateChanged, signOut} from "firebase/auth";
+import {onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
 import Spinner from 'react-bootstrap/Spinner';
 import Dashboard from "./Dashboard";
 import {useNavigate} from "react-router-dom";
-
 
 function App() {
 
@@ -28,7 +27,7 @@ function App() {
                 setIsLoading(false);
             }
         });
-    }, [isLoading]);
+    }, [isLoading, navigate]);
 
     const loadingContent = <Spinner className="Loading" animation="grow" />;
     const mainContent = isLoggedIn ?  <Dashboard/> : <SignIn/>;
