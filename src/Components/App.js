@@ -27,7 +27,7 @@ function App() {
                 setIsLoading(false);
             }
         });
-    }, [isLoading, navigate]);
+    }, [isLoading]);
 
     const loadingContent = <Spinner className="Loading" animation="grow" />;
     const mainContent = isLoggedIn ?  <Dashboard/> : <SignIn/>;
