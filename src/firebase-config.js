@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    apiKey: process.env.REACT_APP_GOOGLE_KEY,
     authDomain: "itranslate-fbfde.firebaseapp.com",
     projectId: "itranslate-fbfde",
     storageBucket: "itranslate-fbfde.appspot.com",

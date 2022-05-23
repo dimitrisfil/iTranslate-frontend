@@ -9,6 +9,7 @@ import Grid from "@mui/material/Grid";
 import DatePicker from "../Components/DatePicker";
 import DataTable from "../Components/DataTable";
 import Tooltip from '@mui/material/Tooltip';
+import MapWrapper from "../Components/Map/MapWrapper";
 
 const CHARACTER_LIMIT = 100;
 
@@ -66,7 +67,9 @@ function getTableAggregations(translationSnapshot, userSnapshot) {
                     uData.firstName + ' ' + uData.lastName,
                     user.tableData[1],
                     user.tableData[3],
-                    <Tooltip title={user.tableData[2].length > CHARACTER_LIMIT ? user.tableData[2] : ""}><div>{truncate(user.tableData[2])}</div></Tooltip>,
+                    <Tooltip title={user.tableData[2].length > CHARACTER_LIMIT ? user.tableData[2] : ""}>
+                        <div>{truncate(user.tableData[2])}</div>
+                    </Tooltip>,
                 ]
             };
         });
@@ -113,6 +116,9 @@ const User = (props) => {
                 </Grid>
                 <Grid item xs={4} sm={8} md={12}>
                     <DataTable aggregations={tableAggregations} headers={headers} hasPagination={false}/>
+                </Grid>
+                <Grid item xs={4} sm={8} md={12}>
+                    <MapWrapper translations={translations.data.docs} users={users.data.docs}/>
                 </Grid>
             </Grid>
         </Box>
