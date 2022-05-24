@@ -7,6 +7,7 @@
     "@emotion/styled": "^11.8.1",
     "@mui/lab": "^5.0.0-alpha.72",
     "@mui/material": "^5.5.0",
+    "@react-google-maps/api": "^2.11.8",
     "@react-query-firebase/firestore": "^0.4.2",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",

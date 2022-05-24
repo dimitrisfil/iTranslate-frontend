@@ -9,7 +9,7 @@ import Grid from "@mui/material/Grid";
 import DatePicker from "../Components/DatePicker";
 import DataTable from "../Components/DataTable";
 import Tooltip from '@mui/material/Tooltip';
-import MapWrapper from "../Components/Map/MapWrapper";
+import MapWrapper from "../Components/MapWrapper";
 
 const CHARACTER_LIMIT = 100;
 
@@ -117,7 +117,7 @@ const User = (props) => {
                 <Grid item xs={4} sm={8} md={12}>
                     <DataTable aggregations={tableAggregations} headers={headers} hasPagination={false}/>
                 </Grid>
-                <Grid item xs={4} sm={8} md={12}>
+                <Grid item xs={4} sm={8} md={12} className="mb-lg-4">
                     <MapWrapper translations={translations.data.docs} users={users.data.docs}/>
                 </Grid>
             </Grid>
